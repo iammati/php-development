@@ -6,10 +6,7 @@
 
 ### A PHP-linter on steroids
 
-## Features
-- Built-in watcher for PHPstan and php-cs-fixer
-
-Blocking resources is managed server-side – via PHP.
+Built-in watcher for PHPstan and php-cs-fixer
 
 ## Why [another](https://github.com/seregazhuk/php-watcher) watcher?
 
