@@ -1,0 +1,16 @@
+{
+    "config": {
+        "bin-dir": "app/bin",
+        "sort-packages": true,
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true
+        }
+    },
+    "require-dev": {
+        "ergebnis/composer-normalize": "^2.25",
+        "friendsofphp/php-cs-fixer": "^3.8",
+        "phpstan/phpstan": "^1.5",
+        "squizlabs/php_codesniffer": "^3.6",
+        "symfony/dotenv": "^6.0"
+    }
+}
