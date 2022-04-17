@@ -2,6 +2,7 @@ import fs from 'fs'
 import chalk from 'chalk'
 import command from '../utils/command.js'
 import { log } from '../utils/log.js'
+import { resolve } from 'path'
 
 const prefix = '» phpstan »'
 
@@ -18,8 +19,9 @@ export default function phpstan (path, init = false, config, callback) {
     const cmd = command(`${config.phpstan.binary}`, [
         `--configuration=${config.phpstan.configFilePath}`,
         '--no-progress',
+        '--level=6',
         'analyse',
-        `/var/www/html/${path}`
+        resolve(path)
     ])
 
     cmd.stderr.on('data', error => log(chalk.redBright(`${prefix} Error: ${error}`), config))

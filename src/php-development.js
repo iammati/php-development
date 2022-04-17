@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 import chokidar from 'chokidar'
-import phpcsfixer from './components/php-cs-fixer.js'
-import phpstan from './components/phpstan.js'
+import phpcsfixer from './commands/php-cs-fixer.js'
+import phpstan from './commands/phpstan.js'
 import { log } from './utils/log.js'
 
 export default class PHPDevelopment {
@@ -16,7 +16,7 @@ export default class PHPDevelopment {
 
         this.execWorkflow(path)
 
-        if (this.config.flags.dryRun) {
+        if (this.config.flags.watch !== true) {
             return false
         }
 
@@ -65,6 +65,7 @@ export default class PHPDevelopment {
 
         phpstan(path, init, this.config, state => {
             if (!state) {
+                delete this.__TEMP_PATHS[path]
                 return null
             }
 
@@ -81,7 +82,7 @@ export default class PHPDevelopment {
                 }
 
                 log(chalk.cyanBright(`php-development » Done after ${time}s`), this.config)
-                this.__TEMP_PATHS[path] = false
+                delete this.__TEMP_PATHS[path]
             })
         })
     }

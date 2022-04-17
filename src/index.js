@@ -2,46 +2,48 @@ import fs from 'fs'
 import chalk from 'chalk'
 import PHPDevelopment from './php-development.js'
 import { prefixLog } from './utils/log.js'
-
-let cwd = process.cwd()
+import { resolve } from 'path'
 
 const argv = process.argv
 const flags = {
-    dryRun: false,
+    config: `${process.cwd()}/.php-development.js`,
+    watch: false,
     path: '',
 }
 
-argv.forEach(key => {
-    if (!key.startsWith('--')) {
-        return false
-    }
+argv.reduce(
+    (acc, currentArg) => {
+        if (currentArg.startsWith('--')) {
+            currentArg = currentArg.replace('--', '')
+            const [param, value] = currentArg.split('=')
 
-    key = key.replace('--', '')
+            if (flags[param] === undefined) {
+                prefixLog(chalk.redBright(`The provided parameter: "--${param}" does not exist`))
+                process.exit(1)
+            }
 
-    if (key === 'dry-run') {
-        flags.dryRun = true
-    }
-
-    if (key.includes('=')) {
-        for (const flag of ['path', 'cwd']) {
-            flags[flag] = key.split('=')[1]
+            if (value === undefined && typeof flags[param] === 'boolean') {
+                flags[param] = !flags[param]
+            } else {
+                flags[param] = value
+            }
         }
-    }
-})
+    },
+)
+
+flags.config = resolve(flags.config)
 
 if (flags.path.length === 0) {
-    prefixLog(chalk.redBright('Please provide a path'))
-    prefixLog(chalk.redBright('E.g. ' + chalk.bgRedBright(' ' + chalk.whiteBright(`php-development ./src`) + ' ')))
+    prefixLog(chalk.redBright('Usage: ' + ((`php-development --path=./src`))))
     process.exit(1)
 }
 
 try {
-    if (!fs.lstatSync(flags.path).isDirectory()) {
-        prefixLog(chalk.redBright('The provided path is not a directory!'))
+    if (!fs.existsSync(flags.path)) {
+        prefixLog(chalk.redBright(`The provided path (${flags.path}) does not exist!`))
         process.exit(1)
     }
 } catch (ENOENT) {
-    prefixLog(chalk.redBright('The provided path does not exist!'))
     throw ENOENT
 }
 
@@ -51,8 +53,8 @@ const development = new PHPDevelopment()
 development.config.flags = flags
 
 try {
-    if (fs.existsSync('.php-development.js')) {
-        import(`${cwd}/.php-development.js`).then(mod => {
+    if (fs.existsSync(`${flags.config}`)) {
+        import(`${flags.config}`).then(mod => {
             development.config = mod.config
             development.config.flags = flags
             development.start(flags.path)
@@ -62,6 +64,7 @@ try {
         development.start(flags.path)
     }
 } catch (ENOENT) {
+    throw ENOENT
     development.config = development.defaultConfig(flags)
     development.start(flags.path)
 }
